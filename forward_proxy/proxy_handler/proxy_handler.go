@@ -7,23 +7,26 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"scratch/random_practice/forward_proxy/config"
 	"scratch/random_practice/forward_proxy/logging"
 	"sync"
 )
 
 type ProxyHandler struct {
-	HTTPClient *http.Client
+	httpClient *http.Client
 	sp         *sync.Pool
 	logger     *slog.Logger
+	cfg        config.Config
 }
 
 // ErrEmptyHost is logged when we receive a request with an empty host header ( can this even happen?)
 var ErrEmptyHost = errors.New("request received with an empty host header")
 
-func New(httpClient *http.Client, logger *slog.Logger) *ProxyHandler {
+func New(httpClient *http.Client, cfg config.Config, logger *slog.Logger) *ProxyHandler {
 	return &ProxyHandler{
 		logger:     logger,
-		HTTPClient: httpClient,
+		httpClient: httpClient,
+		cfg:        cfg,
 		sp: &sync.Pool{
 			New: func() any {
 				return bytes.NewBuffer(nil)
@@ -68,7 +71,7 @@ func (ph *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	req.Header.Add("proxy", "dvt")
 
-	resp, err := ph.HTTPClient.Do(req)
+	resp, err := ph.httpClient.Do(req)
 	if err != nil {
 		ph.logger.With(logging.LoggingErrorKey, err).Error("error executing proxied request")
 

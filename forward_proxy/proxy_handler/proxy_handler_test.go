@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"scratch/random_practice/forward_proxy/config"
 	proxyhandler "scratch/random_practice/forward_proxy/proxy_handler"
 
 	"github.com/reedobrien/checkers"
@@ -27,7 +28,7 @@ func TestServeHTTP(t *testing.T) {
 			checkers.OK(t, err)
 		}))
 
-		tut := proxyhandler.New(ts.Client(), slog.New(slog.NewJSONHandler(io.Discard, &slog.HandlerOptions{})))
+		tut := proxyhandler.New(ts.Client(), config.Config{}, slog.New(slog.NewJSONHandler(io.Discard, &slog.HandlerOptions{})))
 		req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, ts.URL, nil)
 		checkers.OK(t, err)
 

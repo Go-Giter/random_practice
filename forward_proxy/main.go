@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"scratch/random_practice/forward_proxy/config"
 	"scratch/random_practice/forward_proxy/logging"
 	proxyhandler "scratch/random_practice/forward_proxy/proxy_handler"
 	"sync"
@@ -28,6 +29,7 @@ const (
 func main() {
 	proxyPort := flag.String("listen.port", "8989", "port we should listen on")
 	metricsPort := flag.String("metrics.port", "8080", "port for prom to listen on")
+	cfgPath := flag.String("cfg.path", "./config.yaml", "path to our config")
 	verbose := flag.Bool("verbose", false, "enable debug logs?")
 	flag.Parse()
 
@@ -53,11 +55,18 @@ func main() {
 		os.Exit(1)
 	}
 
+	cfg, err := config.New(*cfgPath)
+	if err != nil {
+		logger.With(logging.LoggingErrorKey, err).Error("unable to load config file")
+
+		os.Exit(1)
+	}
+
 	c := &http.Client{
 		Timeout: defaultClientTimeout,
 	}
 
-	ph := proxyhandler.New(c, logger)
+	ph := proxyhandler.New(c, cfg, logger)
 
 	wg.Add(1)
 
