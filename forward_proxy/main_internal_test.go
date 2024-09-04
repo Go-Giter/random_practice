@@ -73,4 +73,53 @@ func TestRunServer(t *testing.T) {
 	cancel()
 
 	wg.Wait()
+
+	checkers.Assert(t,
+		bytes.Contains(logBucket.Bytes(), []byte(`proxy server exiting`)),
+		"unable to locate expected log message %s", logBucket.Bytes())
+}
+
+func TestRunMetricsServer(t *testing.T) {
+	t.Parallel()
+
+	testLstnr, err := net.Listen("tcp", ":0")
+	checkers.OK(t, err)
+
+	logBucket := &safeBuf{
+		b: bytes.NewBuffer(nil),
+	}
+
+	logger := slog.New(slog.NewJSONHandler(logBucket, &slog.HandlerOptions{}))
+
+	wg := &sync.WaitGroup{}
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	wg.Add(1)
+
+	go runMetricsServer(testLstnr, wg, ctx, logger)
+
+	testClient := &http.Client{}
+
+	resp, err := testClient.Get("http://" + testLstnr.Addr().String())
+	checkers.OK(t, err)
+
+	defer resp.Body.Close()
+
+	checkers.Equals(t, resp.StatusCode, http.StatusOK)
+
+	b, err := io.ReadAll(resp.Body)
+	checkers.OK(t, err)
+
+	checkers.Assert(t,
+		bytes.Contains(b, []byte(`promhttp_metric_handler_requests_total`)),
+		"didn't find expected prom metric : %s", b)
+
+	cancel()
+
+	wg.Wait()
+
+	checkers.Assert(t,
+		bytes.Contains(logBucket.Bytes(), []byte(`metrics server exiting`)),
+		"unable to locate expected log message %s", logBucket.Bytes())
 }
