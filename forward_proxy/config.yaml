@@ -1,5 +1,9 @@
 ---
 request_headers:
-    - test-req-header
+    - Accept
+    - Accept-Language
+    - Accept-Encoding
 response_headers:
-    - test-resp-header
+    - Content-Encoding
+    - Content-Type
+    

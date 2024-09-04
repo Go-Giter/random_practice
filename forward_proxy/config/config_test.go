@@ -1,7 +1,6 @@
 package config_test
 
 import (
-	"fmt"
 	"os"
 	"scratch/random_practice/forward_proxy/config"
 	"testing"
@@ -25,8 +24,6 @@ func TestNew(t *testing.T) {
 
 	b, err := yaml.Marshal(cfg)
 	checkers.OK(t, err)
-
-	fmt.Printf("%s", b)
 
 	td := t.TempDir()
 
