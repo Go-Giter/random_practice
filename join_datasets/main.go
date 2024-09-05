@@ -23,11 +23,8 @@ import (
 // george stone | -           | 1999-02-02
 
 func joinData(key string, dataSet1, dataSet2 [][]string) [][]string {
-	result := make([][]string, len(dataSet1[1:]))
-
-	for ri := range result {
-		result[ri] = make([]string, 0, len(dataSet1)+len(dataSet2)/2)
-	}
+	lenOfSlice := len(dataSet1) + len(dataSet2[1:]) - 1
+	result := make([][]string, lenOfSlice)
 
 	resultsMap := make(map[string][]string)
 
@@ -82,7 +79,14 @@ func joinData(key string, dataSet1, dataSet2 [][]string) [][]string {
 		}
 	}
 
-	fmt.Println(resultsMap)
+	result[0] = []string{"name", "ss", "birthday"}
+
+	count := 1
+	for k, v := range resultsMap {
+		result[count] = append(result[count], k)
+		result[count] = append(result[count], v...)
+		count++
+	}
 
 	return result
 }
@@ -91,6 +95,5 @@ func main() {
 	dataSet1 := [][]string{{"name", "ss"}, {"john tree", "555-22-5555"}, {"amanda plum", "444-11-4444"}}
 	dataSet2 := [][]string{{"birthday", "name"}, {"2000-01-01", "john tree"}, {"1999-02-02", "george stone"}}
 	key := "name"
-	joinData(key, dataSet1, dataSet2)
-
+	fmt.Printf("%#v\n", joinData(key, dataSet1, dataSet2))
 }
