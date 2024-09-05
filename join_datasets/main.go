@@ -98,5 +98,6 @@ func main() {
 
 	for _, slc := range joinData(key, dataSet1, dataSet2) {
 		fmt.Printf("%-20s|%-15s|%-15s\n", slc[0], slc[1], slc[2])
+
 	}
 }
