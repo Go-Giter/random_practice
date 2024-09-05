@@ -23,8 +23,7 @@ import (
 // george stone | -           | 1999-02-02
 
 func joinData(key string, dataSet1, dataSet2 [][]string) [][]string {
-	lenOfSlice := len(dataSet1) + len(dataSet2[1:]) - 2
-	result := make([][]string, lenOfSlice)
+	result := make([][]string, 0)
 
 	resultsMap := make(map[string][]string)
 
@@ -52,7 +51,7 @@ func joinData(key string, dataSet1, dataSet2 [][]string) [][]string {
 			continue
 		}
 
-		resultsMap[set[dataSet2Key]] = append(resultsMap[set[dataSet2Key]], set[:dataSet1Key]...)
+		resultsMap[set[dataSet1Key]] = append(resultsMap[set[dataSet1Key]], set[dataSet1Key+1:]...)
 	}
 
 	for _, set := range dataSet2[1:] {
@@ -79,6 +78,10 @@ func joinData(key string, dataSet1, dataSet2 [][]string) [][]string {
 		}
 	}
 
+	for i := 0; i < len(resultsMap)+1; i++ {
+		result = append(result, make([]string, 0))
+	}
+
 	result[0] = []string{"name", "ss", "birthday"}
 
 	count := 1
@@ -92,12 +95,29 @@ func joinData(key string, dataSet1, dataSet2 [][]string) [][]string {
 }
 
 func main() {
-	dataSet1 := [][]string{{"name", "ss"}, {"john tree", "555-22-5555"}, {"amanda plum", "444-11-4444"}, {"Darren Terry", "123-00-0987"}, {"Joe Blazes", "098-456-1111"}}
-	dataSet2 := [][]string{{"birthday", "name"}, {"2000-01-01", "john tree"}, {"1999-02-02", "george stone"}, {"1890-01-02", "Darren Terry"}, {"1731-02-22", "George Washington"}}
+	dataSet1 := [][]string{
+		{"name", "ss"},
+		{"john c tree", "555-22-5555"},
+		{"john b tree", "555-22-5555"},
+		{"john tree", "555-22-5555"},
+		{"amanda plum", "444-11-4444"},
+		{"Darren Terry", "123-00-0987"},
+		{"Joe Blazes", "098-456-1111"},
+	}
+	dataSet2 := [][]string{
+		{"birthday", "name"},
+		{"2000-01-01", "john d tree"},
+		{"2000-01-01", "john b tree"},
+		{"2000-01-01", "john tree"},
+		{"1999-02-02", "george stone"},
+		{"1890-01-02", "Darren Terry"},
+		{"1731-02-22", "George Washington"},
+	}
 	key := "name"
 
-	for _, slc := range joinData(key, dataSet1, dataSet2) {
-		fmt.Printf("%-20s|%-15s|%-15s\n", slc[0], slc[1], slc[2])
+	result := joinData(key, dataSet1, dataSet2)
 
+	for _, slc := range result {
+		fmt.Printf("%-20s|%-15s|%-15s\n", slc[0], slc[1], slc[2])
 	}
 }
