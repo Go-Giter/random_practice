@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // Write a function that joins two data sets on a key, returning the joined data.
 // Bonus points to pretty print the result.
@@ -20,59 +23,66 @@ import "fmt"
 // george stone | -           | 1999-02-02
 
 func joinData(key string, dataSet1, dataSet2 [][]string) [][]string {
-	result := make([][]string, len(dataSet1)+len(dataSet2)/2)
+	lenOfSlice := len(dataSet1) + len(dataSet2[1:]) - 1
+	result := make([][]string, lenOfSlice)
 
-	for ri := range result {
-		result[ri] = make([]string, 0, len(dataSet1)+len(dataSet2)/2)
-	}
+	resultsMap := make(map[string][]string)
 
-	joinPoint := make(map[string]int)
-	joinedData := make(map[string][]string)
+	var (
+		dataSet1Key int
+		dataSet2Key int
+	)
 
 	for i, v := range dataSet1[0] {
 		if v == key {
-			joinPoint["dataSet1"] = i
+			dataSet1Key = i
 		}
 	}
 
 	for i, v := range dataSet2[0] {
 		if v == key {
-			joinPoint["dataSet2"] = i
+			dataSet2Key = i
 		}
 	}
 
-	if len(joinPoint) > 1 {
-		for _, set := range dataSet1[1:] {
-			k := set[joinPoint["dataSet1"]]
-			if _, ok := joinedData[k]; !ok {
-				joinedData[k] = make([]string, 0)
-				set = append(set[:joinPoint["dataSet1"]], set[joinPoint["dataSet1"]+1:]...)
-				joinedData[k] = append(joinedData[k], set...)
+	for _, set := range dataSet1[1:] {
+		if _, ok := resultsMap[set[dataSet1Key]]; !ok {
+			resultsMap[set[dataSet1Key]] = append(resultsMap[set[dataSet1Key]], set[dataSet1Key+1:]...)
 
-				continue
-			}
-			set = append(set[:joinPoint["dataSet2"]], set[joinPoint["dataSet2"]+1:]...)
-			joinedData[k] = append(joinedData[k], set...)
+			continue
 		}
 
-		for _, set := range dataSet2[1:] {
-			k := set[joinPoint["dataSet2"]]
-			if _, ok := joinedData[k]; !ok {
-				joinedData[k] = make([]string, 0)
-				set = append(set[:joinPoint["dataSet2"]], set[joinPoint["dataSet2"]+1:]...)
-				joinedData[k] = append(joinedData[k], set...)
+		resultsMap[set[dataSet2Key]] = append(resultsMap[set[dataSet2Key]], set[:dataSet1Key]...)
+	}
+
+	for _, set := range dataSet2[1:] {
+		if _, ok := resultsMap[set[dataSet2Key]]; !ok {
+			resultsMap[set[dataSet2Key]] = append(resultsMap[set[dataSet2Key]], set[:dataSet2Key]...)
+
+			continue
+		}
+
+		resultsMap[set[dataSet2Key]] = append(resultsMap[set[dataSet2Key]], set[:dataSet2Key]...)
+	}
+
+	for k, v := range resultsMap {
+		if len(v) < 2 {
+			if len(strings.Split(v[0], "-")[0]) < 4 {
+				v = append(v, "-")
+				resultsMap[k] = v
 
 				continue
 			}
-			set = append(set[:joinPoint["dataSet2"]], set[joinPoint["dataSet2"]+1:]...)
-			joinedData[k] = append(joinedData[k], set...)
+
+			v = append([]string{"-"}, v...)
+			resultsMap[k] = v
 		}
 	}
 
 	result[0] = []string{"name", "ss", "birthday"}
 
 	count := 1
-	for k, v := range joinedData {
+	for k, v := range resultsMap {
 		result[count] = append(result[count], k)
 		result[count] = append(result[count], v...)
 		count++
@@ -85,5 +95,5 @@ func main() {
 	dataSet1 := [][]string{{"name", "ss"}, {"john tree", "555-22-5555"}, {"amanda plum", "444-11-4444"}}
 	dataSet2 := [][]string{{"birthday", "name"}, {"2000-01-01", "john tree"}, {"1999-02-02", "george stone"}}
 	key := "name"
-	fmt.Println(joinData(key, dataSet1, dataSet2))
+	fmt.Printf("%#v\n", joinData(key, dataSet1, dataSet2))
 }
