@@ -95,5 +95,7 @@ func main() {
 	dataSet1 := [][]string{{"name", "ss"}, {"john tree", "555-22-5555"}, {"amanda plum", "444-11-4444"}}
 	dataSet2 := [][]string{{"birthday", "name"}, {"2000-01-01", "john tree"}, {"1999-02-02", "george stone"}}
 	key := "name"
-	fmt.Printf("%#v\n", joinData(key, dataSet1, dataSet2))
+	for _, slc := range joinData(key, dataSet1, dataSet2) {
+		fmt.Printf("%-15s|%-15s|%-15s\n", slc[0], slc[1], slc[2])
+	}
 }
